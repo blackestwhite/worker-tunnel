@@ -69,9 +69,9 @@ LISTEN_ADDR="0.0.0.0:443" \
 - اگر یک worker قطع شود، همه کانال‌های متصل به همان worker بسته می‌شوند؛ این رفتار با نسخه پایتون قبلی هماهنگ است.
 - در `worker.js` تبدیل base64 برای payloadهای بزرگ امن‌تر شده و مدیریت بستن socketها هم کامل‌تر شده تا نشت resource کمتر شود.
 
-## GitHub Actions
+## GitHub Actions و Release
 
-ورک‌فلو موجود برای این پلتفرم‌ها فایل اجرایی می‌سازد و به‌عنوان artifact آپلود می‌کند:
+ورک‌فلو موجود برای این پلتفرم‌ها فایل اجرایی می‌سازد:
 
 - Linux `amd64`
 - Linux `arm64`
@@ -80,8 +80,23 @@ LISTEN_ADDR="0.0.0.0:443" \
 - Windows `amd64`
 - Windows `arm64`
 
-این ورک‌فلو در این حالت‌ها اجرا می‌شود:
+رفتار workflow به این شکل است:
 
-- روی هر `push`
+- روی `push` به `master`
 - روی `pull_request`
 - به‌صورت دستی با `workflow_dispatch`
+
+اگر push روی یک tag با الگوی `v*` باشد، مثلاً `v1.0.0`:
+
+- باینری‌ها build می‌شوند
+- به‌عنوان artifact در همان run ذخیره می‌شوند
+- به GitHub Release همان tag هم attach می‌شوند
+
+نمونه:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+بعد از آن فایل‌های اجرایی را در تب Releases هم می‌بینی.

@@ -2,12 +2,18 @@ name: build
 
 on:
   push:
+    branches:
+      - master
+    tags:
+      - "v*"
   pull_request:
   workflow_dispatch:
 
 jobs:
   binaries:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -55,3 +61,9 @@ jobs:
           name: worker-tunnel-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/worker-tunnel-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}
           if-no-files-found: error
+
+      - name: Upload release asset
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/worker-tunnel-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}
