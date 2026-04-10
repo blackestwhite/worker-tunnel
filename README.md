@@ -1,6 +1,6 @@
 # worker-tunnel
 
-`worker-tunnel` نسخه‌ی Go خالص برای جایگزینی `tunnel.py` قدیمی است. این پروژه همان ایده‌ی قبلی را نگه می‌دارد:
+`worker-tunnel` یک تونل TCP روی WebSocket با Go خالص و Cloudflare Workers است.
 
 - روی یک آدرس محلی TCP گوش می‌دهد
 - چند اتصال WebSocket احراز هویت‌شده به Cloudflare Worker باز می‌کند
