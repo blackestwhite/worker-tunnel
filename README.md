@@ -19,11 +19,27 @@
 
 ## راه‌اندازی
 
-### 1. دیپلوی Worker
+### 1. ساخت و دیپلوی Worker
 
-فایل `worker.js` را روی Cloudflare Workers دیپلوی کنید. این Worker درخواست‌های WebSocket را می‌پذیرد و با استفاده از `cloudflare:sockets` به مقصد TCP وصل می‌شود.
+ابتدا یک Worker در Cloudflare بسازید و محتوای فایل `worker.js` را داخل آن قرار دهید. این Worker درخواست‌های WebSocket را می‌پذیرد و با استفاده از `cloudflare:sockets` به مقصد TCP وصل می‌شود.
 
 برای احراز هویت، Worker هدر `Authorization` را بررسی می‌کند. اگر در محیط Cloudflare متغیر `AUTH_SECRET` تعریف شده باشد، همان استفاده می‌شود؛ در غیر این صورت مقدار پیش‌فرض داخل فایل به کار می‌رود.
+
+یک مسیر ساده برای ساخت Worker با `wrangler`:
+
+</div>
+
+```bash
+npm create cloudflare@latest
+```
+
+```bash
+wrangler deploy
+```
+
+<div dir="rtl" align="right">
+
+بعد از دیپلوی، آدرس Worker شما چیزی شبیه `your-worker.your-subdomain.workers.dev` خواهد بود. همین آدرس را باید به‌عنوان مقدار `SNI` در کلاینت Go استفاده کنید.
 
 ### 2. بیلد کلاینت Go
 
@@ -77,37 +93,5 @@ LISTEN_ADDR="0.0.0.0:443" \
 - اگر از `*.workers.dev` استفاده می‌کنید، بررسی TLS به‌صورت پیش‌فرض غیرفعال می‌شود. برای حالت مطمئن‌تر از یک hostname واقعی مثل `your-worker.workers.dev` استفاده کنید.
 - اگر یکی از workerها قطع شود، همه کانال‌های متصل به همان worker بسته می‌شوند و کلاینت دوباره تلاش می‌کند اتصال را برقرار کند.
 - در `worker.js` تبدیل base64 برای payloadهای بزرگ و مدیریت بستن socketها تقویت شده تا رفتار پایدارتر شود.
-
-## بیلد و Release
-
-GitHub Actions برای این معماری‌ها فایل اجرایی می‌سازد:
-
-- Linux `amd64`
-- Linux `arm64`
-- macOS `amd64`
-- macOS `arm64`
-- Windows `amd64`
-- Windows `arm64`
-
-این workflow در این حالت‌ها اجرا می‌شود:
-
-- هنگام `push` به `master`
-- هنگام `pull_request`
-- به‌صورت دستی با `workflow_dispatch`
-
-اگر یک tag با الگوی `v*` بسازید، مثلاً `v1.0.0`، علاوه بر artifactهای معمول، فایل‌های اجرایی داخل GitHub Release همان نسخه هم قرار می‌گیرند.
-
-برای انتشار نسخه:
-
-</div>
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-<div dir="rtl" align="right">
-
-بعد از اجرای workflow، فایل‌های اجرایی در بخش Releases همان نسخه قابل دریافت خواهند بود.
 
 </div>
