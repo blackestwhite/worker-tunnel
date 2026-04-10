@@ -1,40 +1,43 @@
 # worker-tunnel
 
-`worker-tunnel` یک تونل TCP روی WebSocket با Go خالص و Cloudflare Workers است.
+<div dir="rtl" align="right">
 
-- روی یک آدرس محلی TCP گوش می‌دهد
-- چند اتصال WebSocket احراز هویت‌شده به Cloudflare Worker باز می‌کند
-- چند کانال TCP را روی همان WebSocketها multiplex می‌کند
+`worker-tunnel` یک تونل TCP روی WebSocket است که کلاینت آن با Go خالص نوشته شده و سمت سرور آن روی Cloudflare Workers اجرا می‌شود.
+
+## این پروژه چه کار می‌کند؟
+
+- روی یک آدرس TCP محلی گوش می‌دهد
+- چند اتصال WebSocket احراز هویت‌شده به Worker باز نگه می‌دارد
+- اتصال‌های TCP ورودی را روی این WebSocketها multiplex می‌کند
 - هر کانال را از سمت Worker به یک مقصد TCP دیگر وصل می‌کند
-
-فایل `worker.js` همچنان سمت Cloudflare Worker این تونل را پیاده‌سازی می‌کند.
 
 ## ساختار ریپو
 
-- `main.go`: کلاینت اصلی با Go
-- `worker.js`: کد Cloudflare Worker برای اتصال WebSocket به TCP
-- `.github/workflows/build.yml`: ورک‌فلو GitHub Actions برای ساخت فایل‌های اجرایی
+- `main.go`: کلاینت اصلی پروژه
+- `worker.js`: کد Cloudflare Worker
+- `.github/workflows/build.yml`: ورک‌فلو بیلد و انتشار فایل‌های اجرایی
 
-## شروع سریع
+## راه‌اندازی
 
 ### 1. دیپلوی Worker
 
-فایل `worker.js` را با Cloudflare Workers دیپلوی کنید؛ فرقی ندارد با `wrangler` باشد، پنل Cloudflare یا CI.
+فایل `worker.js` را روی Cloudflare Workers دیپلوی کنید. این Worker درخواست‌های WebSocket را می‌پذیرد و با استفاده از `cloudflare:sockets` به مقصد TCP وصل می‌شود.
 
-این Worker فعلاً این هدرها را بررسی می‌کند:
+برای احراز هویت، Worker هدر `Authorization` را بررسی می‌کند. اگر در محیط Cloudflare متغیر `AUTH_SECRET` تعریف شده باشد، همان استفاده می‌شود؛ در غیر این صورت مقدار پیش‌فرض داخل فایل به کار می‌رود.
 
-- `Upgrade: websocket`
-- `Authorization`
+### 2. بیلد کلاینت Go
 
-اگر خواستی، می‌توانی سکرت را به‌جای هاردکد از `env.AUTH_SECRET` در Cloudflare هم پاس بدهی؛ کد همین حالا از آن پشتیبانی می‌کند.
-
-### 2. بیلد باینری Go
+</div>
 
 ```bash
 go build -o worker-tunnel .
 ```
 
+<div dir="rtl" align="right">
+
 ### 3. اجرای برنامه
+
+</div>
 
 ```bash
 AUTH_TOKEN="your-secret" \
@@ -45,9 +48,13 @@ LISTEN_ADDR="0.0.0.0:443" \
 ./worker-tunnel
 ```
 
+<div dir="rtl" align="right">
+
 ## تنظیمات
 
-کلاینت Go تنظیمات را از environment variableها می‌خواند.
+کلاینت Go تنظیمات را از متغیرهای محیطی می‌خواند.
+
+</div>
 
 | متغیر | مقدار پیش‌فرض | توضیح |
 | --- | --- | --- |
@@ -57,21 +64,23 @@ LISTEN_ADDR="0.0.0.0:443" \
 | `SNI` | `*.workers.dev` | مقداری که برای TLS SNI و هدر `Host` استفاده می‌شود |
 | `AUTH_TOKEN` | `d4TkphgXAsFk-Ij7APvyw3BPjOhQMDZcO9ngJ4o11wY` | توکن احراز هویت ارسالی به Worker |
 | `BUFFER_SIZE` | `4096` | اندازه بافر خواندن TCP |
-| `WORKERS_COUNT` | `5` | تعداد WebSocket workerهایی که هم‌زمان زنده نگه داشته می‌شوند |
+| `WORKERS_COUNT` | `5` | تعداد workerهای WebSocket که هم‌زمان زنده نگه داشته می‌شوند |
 | `RECONNECT_AFTER_SEC` | `2` | فاصله زمانی برای reconnect بعد از قطع اتصال |
 | `CONNECT_TIMEOUT_SEC` | `10` | timeout برای برقراری اتصال WebSocket |
 | `TLS_SKIP_VERIFY` | وقتی `SNI` شامل `*` باشد به‌صورت پیش‌فرض `true` است، وگرنه `false` | کنترل بررسی گواهی TLS |
 
+<div dir="rtl" align="right">
+
 ## نکات مهم
 
-- کلاینت Go فقط با standard library نوشته شده و وابستگی جانبی ندارد.
-- اگر `SNI=*.workers.dev` بماند، بررسی TLS به‌صورت پیش‌فرض غیرفعال می‌شود، چون wildcard literal برای verify مناسب نیست. برای حالت امن‌تر از یک hostname واقعی مثل `my-worker.workers.dev` استفاده کن.
-- اگر یک worker قطع شود، همه کانال‌های متصل به همان worker بسته می‌شوند؛ این رفتار با نسخه پایتون قبلی هماهنگ است.
-- در `worker.js` تبدیل base64 برای payloadهای بزرگ امن‌تر شده و مدیریت بستن socketها هم کامل‌تر شده تا نشت resource کمتر شود.
+- کلاینت Go فقط از standard library استفاده می‌کند و وابستگی خارجی ندارد.
+- اگر از `*.workers.dev` استفاده می‌کنید، بررسی TLS به‌صورت پیش‌فرض غیرفعال می‌شود. برای حالت مطمئن‌تر از یک hostname واقعی مثل `your-worker.workers.dev` استفاده کنید.
+- اگر یکی از workerها قطع شود، همه کانال‌های متصل به همان worker بسته می‌شوند و کلاینت دوباره تلاش می‌کند اتصال را برقرار کند.
+- در `worker.js` تبدیل base64 برای payloadهای بزرگ و مدیریت بستن socketها تقویت شده تا رفتار پایدارتر شود.
 
-## GitHub Actions و Release
+## بیلد و Release
 
-ورک‌فلو موجود برای این پلتفرم‌ها فایل اجرایی می‌سازد:
+GitHub Actions برای این معماری‌ها فایل اجرایی می‌سازد:
 
 - Linux `amd64`
 - Linux `arm64`
@@ -80,23 +89,25 @@ LISTEN_ADDR="0.0.0.0:443" \
 - Windows `amd64`
 - Windows `arm64`
 
-رفتار workflow به این شکل است:
+این workflow در این حالت‌ها اجرا می‌شود:
 
-- روی `push` به `master`
-- روی `pull_request`
+- هنگام `push` به `master`
+- هنگام `pull_request`
 - به‌صورت دستی با `workflow_dispatch`
 
-اگر push روی یک tag با الگوی `v*` باشد، مثلاً `v1.0.0`:
+اگر یک tag با الگوی `v*` بسازید، مثلاً `v1.0.0`، علاوه بر artifactهای معمول، فایل‌های اجرایی داخل GitHub Release همان نسخه هم قرار می‌گیرند.
 
-- باینری‌ها build می‌شوند
-- به‌عنوان artifact در همان run ذخیره می‌شوند
-- به GitHub Release همان tag هم attach می‌شوند
+برای انتشار نسخه:
 
-نمونه:
+</div>
 
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
 ```
 
-بعد از آن فایل‌های اجرایی را در تب Releases هم می‌بینی.
+<div dir="rtl" align="right">
+
+بعد از اجرای workflow، فایل‌های اجرایی در بخش Releases همان نسخه قابل دریافت خواهند بود.
+
+</div>
