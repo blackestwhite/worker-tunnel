@@ -25,6 +25,14 @@
 
 برای احراز هویت، Worker هدر `Authorization` را بررسی می‌کند. اگر در محیط Cloudflare متغیر `AUTH_SECRET` تعریف شده باشد، همان استفاده می‌شود؛ در غیر این صورت مقدار پیش‌فرض داخل فایل به کار می‌رود.
 
+برای دیپلوی سریع از روی همین ریپو هم می‌توانید از دکمه زیر استفاده کنید:
+
+</div>
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/blackestwhite/worker-tunnel)
+
+<div dir="rtl" align="right">
+
 یک مسیر ساده برای ساخت Worker با `wrangler`:
 
 </div>
